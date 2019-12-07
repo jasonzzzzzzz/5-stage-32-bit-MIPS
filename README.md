@@ -1,1 +1,15 @@
 # 5-stage-32-bit-MIPS
+
+The optimizations toward energy efficient MIPS processor emphasize different aspects. 
+First, I design a 5-stage pipeline, especially inheriting the design of traditional parallel processor that could leverage data locality. For example, it is proved that writing to an entry of a 128 B register file saves 20× and 800× energy than writing to a 1 KB SRAM and DRAM, respectively. 
+Second, I eliminate unnecessary switching activity by bypassing some pipeline stages for different instructions. This saves dynamic power by approximately 20% for many types of instructions, e.g. arithmetic instructions and store instructions. 
+Third, I add simple clock gating logic which saves static power when long memory latency happens or when there are no programs to run. 
+Finally, I provided parameters in our VHDL source code for conveniently adjusting the datapath precision for a specified MIPS design. This is beneficial since for many workloads, 64-bit is over-precise for users. For instance, 8-bit datapath is acceptable enough to perform deep neural network execution and achieve similar accuracy compared with that of using 32-bit datapath. From hardware cost perspective, 8-bit integer addition saves 13× energy and 38× area than a 16-bit floating point addition.
+
+Pipelining is widely used in modern commodity processors, becasue it provides ILP (instruction-level parallelism) and enables faster clock speed. However, although deep pipeline provides more potentials for simultaneously processing more instruction, it suffers from pipeline stalls and high penalty when mispredicting branches. In our project, I design a 5-stage pipeline for the MIPS processors, increasing instruction throughput and avoiding data operands repetitively moving between memory and processor. Via this pipelining architecture design, it improves energy efficiency of the MIPS processor.
+
+I decouple the instruction processing into 5 stages, i.e. Instruction Fetch (IF), Instruction Decode and Register Fetch (ID), Execute and Address Calculation (EX), Memory Access (MEM), and Write-Back (WB). Between each two pipeline stages, there is a pipeline register, guaranteeing signal correctness under a certain clock speed.
+
+Based on a testBench of Fibonacci Algorithm, for The bypassing design further reduces the delay by approximately 20% and decreases the switching activity of MEM and WB logics. In total the energy is decreased by ideally about 30% compared to a 5-stage pipelined-MIPS processor.In addition, the chip area is 55,077 um2 while 92% of the logic power is consumed in IF stage, ID stage, and EX stage. The layout has no DRC error in Innovus and also no LVS error in Cadence Virtuoso.
+
+Note that the delay, power, and energy benefits of the bypassing design strongly depend on the program executed. For those programs performing non-trivial amount of arithmetic operations, i.e. compute intensive, our bypassing design could achieve near-ideal energy saving. In contrast, if the program is dominated by LD instructions, which require the whole execution of the 5 stages, the energy benefits will get lower.
